@@ -68,11 +68,6 @@ jobs:
             npm install better-keypress@${{ env.NEW_VERSION }}
             ```
             
-            ## Files included
-            - better-keypress.js (CommonJS)
-            - better-keypress.esm.js (ES Module)
-            - better-keypress.d.ts (TypeScript definitions)
-            
             ## Demo
             [View Demo](https://better-keypress.netlify.app/)
           draft: false
