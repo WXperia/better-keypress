@@ -1,8 +1,7 @@
 {
   "name": "better-keypress",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A better keypress library for native JavaScript",
-
   "author": "Wxperia",
   "license": "MIT",
   "main": "dist/index.js",
