@@ -19,6 +19,7 @@
     "dist"
   ],
   "scripts": {
+    "release": "standard-version",
     "dev": "esbuild src/index.ts --bundle --watch --outfile=dist/index.js --format=cjs --sourcemap",
     "build": "npm run build:cjs && npm run build:esm && npm run build:types",
     "build:cjs": "esbuild src/index.ts --bundle --outfile=dist/index.js --format=cjs --minify",
