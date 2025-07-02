@@ -1,0 +1,1 @@
+export { BetterKeyPress, type BetterKeyPressOptions, type KeyPressEvent } from "./core";
