@@ -44,8 +44,8 @@ export class BetterKeyPress {
     this.activeCodes.add(code);
     if(!this.isBlock(e)) {
       this.execute(e);
-       // 按住command后，其他按键的keyup事件不会触发，需要手动移除
-      // 组合功能键不受限制
+       // When command is held down, keyup events for other keys won't trigger, so we need to manually remove them
+      // Combination function keys are not restricted
       if (e.metaKey && key !== 'meta' && key !== 'control' && key !== 'shift') {
         
         nextTick(() => {
@@ -107,7 +107,6 @@ export class BetterKeyPress {
     this.target.removeEventListener("keyup", this.handleKeyUp as EventListener);
     this.target.removeEventListener("blur", this.handleBlur as EventListener);
     this.isListening = false;
-    this.eventMap.clear();
     this.activeKeys.clear();
     this.activeCodes.clear();
   }

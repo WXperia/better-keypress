@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Better KeyPress - Interactive Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .demo-section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #4ecdc4;
+        }
+
+        .demo-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .key-display {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            margin: 15px 0;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+        }
+
+        .status-display {
+            background: #34495e;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            min-height: 100px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+        }
+
+        .input-group {
+            margin: 20px 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: #4ecdc4;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+        }
+
+        .key-combinations {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .key-combo {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #eee;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .key-combo:hover {
+            border-color: #4ecdc4;
+            transform: translateY(-2px);
+        }
+
+        .key-combo .combo {
+            font-weight: bold;
+            color: #4ecdc4;
+            margin-bottom: 8px;
+        }
+
+        .key-combo .action {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .active-keys {
+            background: #e74c3c;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 5px;
+            font-size: 0.9rem;
+        }
+
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px 0;
+            border-bottom: 1px solid #444;
+        }
+
+        .log-time {
+            color: #95a5a6;
+            font-size: 0.8rem;
+        }
+
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2ecc71;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎹 Better KeyPress Demo</h1>
+            <p>A powerful and flexible keyboard event handling library</p>
+        </div>
+
+        <div class="content">
+            <!-- Basic Key Detection -->
+            <div class="demo-section">
+                <h2>🔍 Real-time Key Detection</h2>
+                <p>Press any key to see it detected in real-time:</p>
+                <div class="key-display" id="keyDisplay">Press any key...</div>
+                <div id="activeKeys"></div>
+            </div>
+
+            <!-- Key Combinations -->
+            <div class="demo-section">
+                <h2>⌨️ Predefined Key Combinations</h2>
+                <p>Try these key combinations:</p>
+                <div class="key-combinations">
+                    <div class="key-combo">
+                        <div class="combo">Ctrl + S</div>
+                        <div class="action">Save Action</div>
+                    </div>
+                    <div class="key-combo">
+                        <div class="combo">Ctrl + C</div>
+                        <div class="action">Copy Action</div>
+                    </div>
+                    <div class="key-combo">
+                        <div class="combo">Ctrl + Z</div>
+                        <div class="action">Undo Action</div>
+                    </div>
+                    <div class="key-combo">
+                        <div class="combo">Alt + T</div>
+                        <div class="action">Toggle Theme</div>
+                    </div>
+                    <div class="key-combo">
+                        <div class="combo">Escape</div>
+                        <div class="action">Clear Log</div>
+                    </div>
+                    <div class="key-combo">
+                        <div class="combo">Space</div>
+                        <div class="action">Show Toast</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Blocking Demo -->
+            <div class="demo-section">
+                <h2>🚫 Input Element Blocking</h2>
+                <p>Key combinations are automatically blocked in input elements (try Ctrl+S in the inputs below):</p>
+                <div class="input-group">
+                    <label for="textInput">Regular Text Input:</label>
+                    <input type="text" id="textInput" placeholder="Key combinations won't work here...">
+                </div>
+                <div class="input-group">
+                    <label for="textarea">Textarea:</label>
+                    <textarea id="textarea" rows="3" placeholder="Type here... key combinations are blocked"></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="customInput">Custom Input (with allow-keypress attribute):</label>
+                    <input type="text" id="customInput" allow-keypress placeholder="Key combinations WILL work here!">
+                </div>
+            </div>
+
+            <!-- Custom Key Binding -->
+            <div class="demo-section">
+                <h2>🎛️ Custom Key Binding</h2>
+                <p>Add your own key combinations:</p>
+                <div class="input-group">
+                    <label for="customKey">Key Combination (e.g., ctrl+shift+a):</label>
+                    <input type="text" id="customKey" placeholder="ctrl+shift+a">
+                </div>
+                <div class="input-group">
+                    <label for="customAction">Action Description:</label>
+                    <input type="text" id="customAction" placeholder="My custom action">
+                </div>
+                <button class="btn" onclick="addCustomBinding()">Add Binding</button>
+                <button class="btn btn-danger" onclick="clearCustomBindings()">Clear All Custom Bindings</button>
+            </div>
+
+            <!-- Log Display -->
+            <div class="demo-section">
+                <h2>📝 Event Log</h2>
+                <div class="status-display" id="logDisplay"></div>
+            </div>
+
+            <!-- Controls -->
+            <div class="demo-section">
+                <h2>🎮 Controls</h2>
+                <button class="btn" onclick="startKeyPress()">Start Listening</button>
+                <button class="btn btn-danger" onclick="stopKeyPress()">Stop Listening</button>
+                <button class="btn" onclick="clearLog()">Clear Log</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Better KeyPress Library - Demo by Wxperia</p>
+            <p>Deploy this to Netlify for a live demo!</p>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <!-- Load the Better KeyPress library -->
+    <script src="./dist/index.esm.js" type="module"></script>
+    <script type="module">
+        import { BetterKeyPress } from './dist/index.esm.js';
+        
+        // Initialize the library
+        const keyPress = new BetterKeyPress({
+            defaultBlockAttributes: ['contenteditable', 'block-keypress']
+        });
+
+        // DOM elements
+        const keyDisplay = document.getElementById('keyDisplay');
+        const activeKeysDisplay = document.getElementById('activeKeys');
+        const logDisplay = document.getElementById('logDisplay');
+        const toast = document.getElementById('toast');
+
+        let customBindings = [];
+        let logEntries = [];
+
+        // Utility functions
+        function logEvent(message) {
+            const time = new Date().toLocaleTimeString();
+            logEntries.unshift(`<div class="log-entry"><span class="log-time">[${time}]</span> ${message}</div>`);
+            if (logEntries.length > 50) logEntries.pop();
+            logDisplay.innerHTML = logEntries.join('');
+        }
+
+        function showToast(message, duration = 3000) {
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), duration);
+        }
+
+        function updateActiveKeys() {
+            const keys = Array.from(keyPress.activeKeys);
+            if (keys.length > 0) {
+                activeKeysDisplay.innerHTML = `<strong>Active Keys:</strong> ${keys.map(key => `<span class="active-keys">${key}</span>`).join('')}`;
+            } else {
+                activeKeysDisplay.innerHTML = '';
+            }
+        }
+
+        // Setup predefined key combinations
+        function setupPredefinedBindings() {
+            // Save action
+            keyPress.on('ctrl+s', (e) => {
+                logEvent('💾 Save action triggered!');
+                showToast('Document saved!');
+            }, { preventDefault: true });
+
+            // Copy action
+            keyPress.on('ctrl+c', (e) => {
+                logEvent('📋 Copy action triggered!');
+                showToast('Content copied!');
+            });
+
+            // Undo action
+            keyPress.on('ctrl+z', (e) => {
+                logEvent('↩️ Undo action triggered!');
+                showToast('Action undone!');
+            }, { preventDefault: true });
+
+            // Theme toggle
+            keyPress.on('alt+t', (e) => {
+                document.body.style.filter = document.body.style.filter ? '' : 'hue-rotate(180deg)';
+                logEvent('🎨 Theme toggled!');
+                showToast('Theme changed!');
+            });
+
+            // Clear log
+            keyPress.on('escape', (e) => {
+                clearLog();
+                showToast('Log cleared!');
+            });
+
+            // Show toast
+            keyPress.on(' ', (e) => {
+                if (e.target === document.body) {
+                    showToast('Space key pressed!');
+                    logEvent('🚀 Space key action triggered!');
+                }
+            });
+        }
+
+        // Key detection for display
+        function setupKeyDetection() {
+            keyPress.on('*', (e) => {
+                const key = e.key;
+                const code = e.code;
+                const isModifier = ['Control', 'Alt', 'Shift', 'Meta'].includes(key);
+                
+                if (!isModifier) {
+                    keyDisplay.textContent = `Key: "${key}" | Code: "${code}"`;
+                }
+                
+                updateActiveKeys();
+                
+                // Log if not a modifier key
+                if (!isModifier) {
+                    logEvent(`Key pressed: <strong>${key}</strong> (${code})`);
+                }
+            });
+        }
+
+        // Global functions for HTML onclick handlers
+        window.startKeyPress = function() {
+            keyPress.start();
+            logEvent('✅ KeyPress listening started');
+            showToast('Listening started!');
+        };
+
+        window.stopKeyPress = function() {
+            keyPress.stop();
+            logEvent('❌ KeyPress listening stopped');
+            showToast('Listening stopped!');
+        };
+
+        window.clearLog = function() {
+            logEntries = [];
+            logDisplay.innerHTML = '';
+            logEvent('🧹 Log cleared');
+        };
+
+        window.addCustomBinding = function() {
+            const keyInput = document.getElementById('customKey');
+            const actionInput = document.getElementById('customAction');
+            
+            const key = keyInput.value.trim();
+            const action = actionInput.value.trim();
+            
+            if (!key || !action) {
+                showToast('Please fill in both fields!', 2000);
+                return;
+            }
+            
+            // Add the custom binding
+            const handler = (e) => {
+                logEvent(`🎯 Custom action: ${action}`);
+                showToast(`Custom action: ${action}`);
+            };
+            
+            keyPress.on(key, handler);
+            customBindings.push({ key, action, handler });
+            
+            logEvent(`➕ Added custom binding: <strong>${key}</strong> → ${action}`);
+            showToast(`Added: ${key} → ${action}`);
+            
+            // Clear inputs
+            keyInput.value = '';
+            actionInput.value = '';
+        };
+
+        window.clearCustomBindings = function() {
+            customBindings.forEach(binding => {
+                keyPress.off(binding.key, binding.handler);
+            });
+            customBindings = [];
+            logEvent('🗑️ All custom bindings cleared');
+            showToast('Custom bindings cleared!');
+        };
+
+        // Initialize everything
+        function init() {
+            setupPredefinedBindings();
+            setupKeyDetection();
+            keyPress.start();
+            logEvent('🚀 Better KeyPress Demo initialized');
+            showToast('Demo ready! Try some key combinations!', 4000);
+        }
+
+        // Start the demo
+        init();
+
+        // Handle modifier key display updates
+        document.addEventListener('keyup', () => {
+            updateActiveKeys();
+        });
+
+        document.addEventListener('blur', () => {
+            activeKeysDisplay.innerHTML = '';
+        });
+    </script>
+</body>
+</html>

@@ -1,5 +1,7 @@
 # Better Keypress
 
+[中文](./README.zh.md) | **English**
+
 A better keypress library for native JavaScript with TypeScript support.
 
 ## Features
