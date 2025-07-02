@@ -2,14 +2,7 @@
   "name": "better-keypress",
   "version": "1.0.0",
   "description": "A better keypress library for native JavaScript",
-  "keywords": [
-    "keypress",
-    "keyboard",
-    "events",
-    "native",
-    "javascript",
-    "typescript"
-  ],
+
   "author": "Wxperia",
   "license": "MIT",
   "main": "dist/index.js",
