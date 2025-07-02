@@ -54,8 +54,11 @@ jobs:
       - name: Bump version (manual trigger)
         if: github.event_name == 'workflow_dispatch'
         run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
           npm version ${{ github.event.inputs.version }} --no-git-tag-version
-          echo "NEW_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+          echo "Version updated from $CURRENT_VERSION to $NEW_VERSION"
 
       - name: Get version from tag
         if: github.event_name == 'push'
@@ -66,7 +69,12 @@ jobs:
       - name: Update package.json version (tag push)
         if: github.event_name == 'push'
         run: |
-          npm version $NEW_VERSION --no-git-tag-version
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          if [ "$CURRENT_VERSION" != "$NEW_VERSION" ]; then
+            npm version $NEW_VERSION --no-git-tag-version
+          else
+            echo "Version is already $NEW_VERSION, skipping version update"
+          fi
 
       - name: Commit and push version bump (manual trigger)
         if: github.event_name == 'workflow_dispatch'
